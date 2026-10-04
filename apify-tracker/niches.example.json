@@ -1,0 +1,12 @@
+{
+  "include": {
+    "shopee": ["\\bshopee\\b"],
+    "booking.com": ["\\bbooking\\b"]
+  },
+  "exclude": ["medium"],
+  "services": {
+    "followers": {"label": "Followers Scraper", "patterns": ["\\bfollowers?\\b", "\\bfollowing\\b"]},
+    "lead_gen": {"label": "Lead Generator", "patterns": ["\\bleads?\\b", "\\bprospects?\\b"]}
+  },
+  "exclude_services": ["images"]
+}

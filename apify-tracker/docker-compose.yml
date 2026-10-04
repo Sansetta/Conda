@@ -1,0 +1,38 @@
+services:
+  mysql:
+    image: mysql:8.0
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    env_file: .env
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      retries: 20
+
+  # ежедневный сбор (03:00 по времени контейнера), схема создаётся автоматически
+  tracker:
+    build: .
+    command: python -m tracker --daemon --at 03:00
+    env_file: .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # мониторинг цен всех акторов: проход раз в 3 часа (таблица actor_price_monitor). Включайте, если нужны цены чаще раза в сутки
+  price-monitor:
+    build: .
+    command: python -m tracker --monitor-prices --monitor-loop-hours 3
+    env_file: .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: ["monitor"]     # docker compose --profile monitor up -d
+
+
+volumes:
+  mysql_data:
